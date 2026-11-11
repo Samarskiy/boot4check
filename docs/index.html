@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boot4Check: find the Spring Boot 4 upgrade problems that still compile</title>
+<meta name="description" content="A free, open-source scanner that finds Spring Boot 3 to 4 upgrade problems which pass the build and change behaviour at runtime.">
+<style>
+  :root {
+    --bg: #fbfaf7; --surface: #ffffff; --text: #1d1c1a; --muted: #5f5c55; --line: #e4e1d9;
+    --accent: #1f6f43; --accent-text: #ffffff; --code-bg: #14161a; --code-text: #e6e3da;
+    --warn: #8a5a00; --ok: #1f6f43;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131412; --surface: #1b1d1a; --text: #ecebe6; --muted: #a5a299; --line: #2e312c;
+      --accent: #5fce8f; --accent-text: #0d1a12; --code-bg: #0b0c0e; --code-text: #e6e3da;
+      --warn: #e2b458; --ok: #5fce8f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 0 20px 80px; }
+  header { padding: 72px 0 24px; }
+  .brand { font-weight: 700; letter-spacing: .02em; color: var(--accent); margin: 0 0 28px; }
+  h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.12; margin: 0 0 20px; letter-spacing: -.02em; }
+  h2 { font-size: 24px; margin: 56px 0 12px; letter-spacing: -.01em; }
+  p { margin: 0 0 16px; }
+  .lead { font-size: 20px; color: var(--muted); }
+  a { color: var(--accent); }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 8px; }
+  .button { display: inline-block; padding: 12px 20px; border-radius: 8px; font-weight: 600;
+    text-decoration: none; border: 1px solid var(--accent); }
+  .button.primary { background: var(--accent); color: var(--accent-text); }
+  .button.secondary { color: var(--accent); }
+  .button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  pre { background: var(--code-bg); color: var(--code-text); padding: 18px 20px; border-radius: 10px;
+    overflow-x: auto; font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0 0 16px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+  .caption { color: var(--muted); font-size: 15px; }
+  ul.checks { list-style: none; padding: 0; margin: 0; }
+  ul.checks li { padding: 14px 0; border-top: 1px solid var(--line); }
+  ul.checks li:last-child { border-bottom: 1px solid var(--line); }
+  ul.checks strong { display: block; }
+  ul.checks span { color: var(--muted); }
+  .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-top: 8px; }
+  .plan { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+  .plan h3 { margin: 0 0 4px; font-size: 18px; }
+  .price { font-size: 28px; font-weight: 700; margin: 0 0 10px; }
+  .plan ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 15.5px; }
+  .tag { display: inline-block; font-size: 12.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid currentColor; margin-left: 6px; vertical-align: 2px; }
+  .tag.now { color: var(--ok); }
+  .tag.soon { color: var(--warn); }
+  .honest { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; }
+  .honest ul { margin: 0; padding-left: 20px; }
+  footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14.5px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="brand">Boot4Check</p>
+    <h1>Your Spring Boot 4 upgrade compiles. That doesn't mean it works.</h1>
+    <p class="lead">Boot4Check scans a Spring Boot 3 project for the changes that pass the build and
+      change behaviour at runtime: Jackson 3 defaults, ignored configuration, migrations that no longer run.</p>
+    <div class="actions">
+      <a class="button primary" href="https://github.com/Samarskiy/boot4check">Get the free scanner</a>
+      <!-- TODO before publishing: replace WAITLIST_URL with the real form link. -->
+      <a class="button secondary" href="WAITLIST_URL">Join the waitlist for the paid kit</a>
+    </div>
+    <p class="caption">Open source, Apache 2.0. Runs locally and only reads files. Your code never leaves your machine.</p>
+  </header>
+
+  <section>
+    <h2>One command, one report</h2>
+<pre>$ java -jar boot4check.jar ./my-service
+
+== Silent behaviour change (3) ==
+
+[B4C-J001] ObjectMapper bean no longer replaces the auto-configured mapper
+  Fix: Define a tools.jackson.databind.json.JsonMapper bean, or move the
+       settings into a JsonMapperBuilderCustomizer.
+    src/main/java/com/acme/config/JacksonConfig.java:21  @Bean objectMapper()
+
+[B4C-J003] Enum overrides toString(): its JSON value changes
+    src/main/java/com/acme/order/OrderStatus.java:8  enum OrderStatus
+
+[B4C-B002] Database migrations need the new Flyway / Liquibase starter
+    pom.xml:74  flyway-core without spring-boot-starter-flyway
+
+Summary: 3 silent, 0 startup, 0 build</pre>
+    <p class="caption">Illustrative output. Every finding links to the official document the rule is based on.</p>
+  </section>
+
+  <section>
+    <h2>What it looks for</h2>
+    <ul class="checks">
+      <li><strong>JSON that changes shape</strong>
+        <span>Jackson 3 serializes enums through <code>toString()</code>, rejects <code>null</code> for primitives
+          and ignores Jackson 2 serializers and customizers.</span></li>
+      <li><strong>Configuration that is quietly ignored</strong>
+        <span>An <code>ObjectMapper</code> bean no longer replaces the default mapper. Renamed
+          <code>spring.jackson.*</code> keys stop having any effect.</span></li>
+      <li><strong>Infrastructure that stops running</strong>
+        <span>Flyway and Liquibase need a new starter. Spring Batch keeps its metadata in memory unless you ask otherwise.</span></li>
+      <li><strong>Null handling that moved</strong>
+        <span><code>PropertyMapper</code> skips <code>null</code> values by default.</span></li>
+      <li><strong>The loud ones too</strong>
+        <span>Removed annotations, renamed starters, Undertow, test auto-configuration. You would find these anyway;
+          the report lists them so you can plan.</span></li>
+    </ul>
+    <p class="caption" style="margin-top:14px">18 rules today, each based on the
+      <a href="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide">Spring Boot 4.0 Migration Guide</a>
+      or the <a href="https://github.com/FasterXML/jackson-future-ideas/wiki/JSTEP-2">Jackson 3 default changes</a>.</p>
+  </section>
+
+  <section>
+    <h2>Why not just a rewrite tool?</h2>
+    <p>Rewrite tools rename classes and move packages. That is the mechanical half of the upgrade, and you should
+      use one. They do not tell you that your API now returns different JSON or that a property stopped applying.
+      Boot4Check covers that half.</p>
+  </section>
+
+  <section>
+    <h2>Free scanner, paid kit</h2>
+    <div class="plans">
+      <div class="plan">
+        <h3>Scanner <span class="tag now">available</span></h3>
+        <p class="price">Free</p>
+        <ul>
+          <li>All 18 rules</li>
+          <li>File and line for every finding</li>
+          <li>Text and JSON output, CI exit code</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <h3>Project kit <span class="tag soon">planned</span></h3>
+        <p class="price">$149</p>
+        <ul>
+          <li>Generated tests that pin your JSON output before you upgrade</li>
+          <li>Generated access tests for protected endpoints</li>
+          <li>Step-by-step migration plan for one repository</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <h3>Team kit <span class="tag soon">planned</span></h3>
+        <p class="price">$399</p>
+        <ul>
+          <li>Everything in the project kit</li>
+          <li>Unlimited repositories</li>
+          <li>12 months of rule updates</li>
+        </ul>
+      </div>
+    </div>
+    <p class="caption" style="margin-top:14px">The paid kit does not exist yet. Join the waitlist and we will
+      build it if enough teams want it. Prices may change before launch.</p>
+  </section>
+
+  <section>
+    <h2>What it cannot do</h2>
+    <div class="honest">
+      <ul>
+        <li>It reads source code without resolving types, so some findings are false positives. Each rule states its confidence.</li>
+        <li>It sees only the dependencies your build files declare, not transitive ones.</li>
+        <li>A clean report is not proof that the upgrade is safe. It checks a fixed list of known changes.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    Boot4Check is an independent project. It is not affiliated with or endorsed by Broadcom or the Spring team.
+    Spring and Spring Boot are trademarks of Broadcom Inc. and/or its subsidiaries.
+  </footer>
+</main>
+</body>
+</html>
