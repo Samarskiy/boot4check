@@ -60,6 +60,9 @@ Every finding in the report links to the document the rule is based on: the
 the [Jackson 3 default changes (JSTEP-2)](https://github.com/FasterXML/jackson-future-ideas/wiki/JSTEP-2) or the
 [Spring blog post on Jackson 3 support](https://spring.io/blog/2025/10/07/introducing-jackson-3-support-in-spring/).
 
+Rules J001, J003, J004, J005 and B002 were reproduced on a Spring Boot 4.0.0 application; see
+[samples/boot4-verify](samples/boot4-verify). The other rules are based on the documents above and have not been run.
+
 If the project sets `spring.jackson.use-jackson2-defaults=true`, the rules that depend on Jackson 3 defaults
 (J003, J004) are skipped and the report says so.
 
