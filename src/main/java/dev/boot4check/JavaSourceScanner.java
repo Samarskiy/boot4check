@@ -110,6 +110,10 @@ final class JavaSourceScanner {
 
     private void scanSpringBootTest(Source source, ClassOrInterfaceDeclaration test, List<Finding> findings) {
         for (FieldDeclaration field : test.getFields()) {
+            if (!isInjected(field)) {
+                // A client the test builds itself (for example WebTestClient.bindToServer()) is unaffected.
+                continue;
+            }
             String type = simpleName(field.getElementType());
             if (type.equals("MockMvc") && !hasAnnotation(test, "AutoConfigureMockMvc")) {
                 findings.add(at(Rule.MOCKMVC_NOT_AUTOCONFIGURED, source, field, test.getNameAsString()));
@@ -203,6 +207,10 @@ final class JavaSourceScanner {
                 .map(annotation -> annotation.getName().getIdentifier())
                 .anyMatch(name -> name.equals("JsonValue") || name.equals("JsonProperty")
                         || name.equals("JsonCreator"));
+    }
+
+    private static boolean isInjected(FieldDeclaration field) {
+        return hasAnnotation(field, "Autowired") || hasAnnotation(field, "Inject") || hasAnnotation(field, "Resource");
     }
 
     private static boolean imports(CompilationUnit unit, String packagePrefix) {

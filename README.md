@@ -69,8 +69,14 @@ If the project sets `spring.jackson.use-jackson2-defaults=true`, the rules that 
   class of your own named `ObjectMapper` would be flagged. Rules that rely on this are marked `MEDIUM` confidence.
 - **Declared dependencies only.** Build files are matched as text. Dependencies that arrive transitively, through a
   parent POM outside the repository, or through a version catalog alias are not seen.
-- **Inheritance is not followed.** A test whose base class carries `@AutoConfigureMockMvc` is still flagged (T001).
+- **Inheritance and constructor injection are not followed.** A test whose base class carries `@AutoConfigureMockMvc`
+  is still flagged (T001); a test that receives `MockMvc` through its constructor is missed. Only fields annotated
+  `@Autowired`, `@Inject` or `@Resource` are checked.
 - **J003 and J004 do not know whether a type is really serialized.** J003 flags every enum that overrides
   `toString()`; J004 only looks at fields declared directly on the `@RequestBody` type, not on nested or parent types.
 - **A clean report is not proof of a safe upgrade.** The scanner checks the fixed list above and nothing else.
 - Files that cannot be parsed are listed in the report and are not checked.
+
+## Licence
+
+Apache License 2.0. See [LICENSE](LICENSE).

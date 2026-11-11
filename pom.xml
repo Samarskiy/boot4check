@@ -10,6 +10,13 @@
   <name>Boot4Check</name>
   <description>Finds Spring Boot 3 to 4 upgrade problems that compile cleanly and break at runtime</description>
 
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

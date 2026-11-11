@@ -160,6 +160,7 @@ class ScannerTest {
                 }
                 """);
         java("SliceTest", "@WebMvcTest class SliceTest { @Autowired MockMvc mvc; }");
+        java("ManualClientTest", "@SpringBootTest class ManualClientTest { private WebTestClient client; }");
 
         assertEquals(List.of(Rule.MOCKMVC_NOT_AUTOCONFIGURED, Rule.TEST_CLIENT_NOT_AUTOCONFIGURED), rules());
     }
