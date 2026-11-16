@@ -80,6 +80,16 @@ If the project sets `spring.jackson.use-jackson2-defaults=true`, the rules that 
 - **A clean report is not proof of a safe upgrade.** The scanner checks the fixed list above and nothing else.
 - Files that cannot be parsed are listed in the report and are not checked.
 
+## Contributing
+
+Boot4Check is free and has no paid edition. It only knows the changes it has been taught, so reports of
+upgrade breaks that are missing from the table above are the most useful contribution: open an issue with the
+symptom and, ideally, a few lines of code that reproduce it on Spring Boot 4.
+
+To add a rule: describe it in `Rule.java` (with the document it is based on), detect it in the matching scanner
+(`JavaSourceScanner`, `BuildFileScanner` or `ConfigScanner`), and add a positive and a negative case to
+`ScannerTest`. Run `mvn package`.
+
 ## Licence
 
 Apache License 2.0. See [LICENSE](LICENSE).
